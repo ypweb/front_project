@@ -291,7 +291,7 @@
 	};
 	//手机格式化
 	public_tool.phoneFormat=function(str){
-		var phoneno=str.toString().replace(/\s*/g,'');
+		var phoneno=str.toString().replace(/\s*\D*/g,'');
 		if(phoneno==''){
 			return '';
 		}
@@ -1489,7 +1489,8 @@
 	/*退出系统*/
 	public_tool.loginOut=function(){
 		var self=this,
-			isindex=self.routeMap.isindex;
+			isindex=self.routeMap.isindex,
+			module=self.routeMap.module;
 
 		/*清除所有记录*/
 		self.clear();
@@ -1499,7 +1500,11 @@
 		if(isindex){
 			location.href='account/login.html';
 		}else{
-			location.href='../account/login.html';
+			if(module.indexOf('account')!==-1){
+				location.href='login.html';
+			}else{
+				location.href='../account/login.html';
+			}
 		}
 	};
 	/*清除内存数据*/
@@ -1785,7 +1790,7 @@ var public_vars = public_vars || {};
 									opts['rules'][name][params[1]] = params[2];
 
 
-									message = $field.data('message-' + params[1]);
+									message = $field.data('message-' + params[1])||$field.attr('data-message-'+ params[1]);
 
 									if(message) {
 										opts['messages'][name][params[1]] = message;
