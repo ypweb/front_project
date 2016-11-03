@@ -63,8 +63,9 @@
 			height: 100%;
 		}
 		.logo{
+			display:none;
 			@logowidth:232px;
-			.layout-absolutel-base(50%,1px);
+			.layout-absolutel-base(0,1px);
 			width:@logowidth;
 			margin:0 0 0 -@logowidth/2;
 			height:64px;
@@ -72,20 +73,14 @@
 		}
 		img{
 			@imgwidth:177px;
-			.layout-absolutel-base(50%,-25px);
+			.layout-absolutel-base(0,-55px);
 			width:@imgwidth;
 			margin:0 0 0 -@imgwidth/2;
 			display: block;
 		}
 	}
-	.nav-item1,.nav-item2,.nav-item3{
-		width:120px;
-	}
-	.nav-iteml{
-		float:left;
-	}
-	.nav-item4,.nav-item5{
-		width:180px;
+	.nav-item1,.nav-item2,.nav-item3,.nav-item4,.nav-item5{
+		width:100px;
 	}
 }
 /*头部缩略模式*/
@@ -114,10 +109,7 @@
 		}
 	}
 	.nav-item1,.nav-item2,.nav-item3,.nav-item4,.nav-item5{
-		width:19.5% !important;
-	}
-	.nav-iteml{
-		float:none !important;
+		width:15% !important;
 	}
 }
 
@@ -179,7 +171,7 @@
 			}
 		}
 		.nav-item1,.nav-item2,.nav-item3,.nav-item4,.nav-item5{
-			width:19.5% !important;
+			width:15% !important;
 		}
 		.nav-iteml{
 			float:none !important;

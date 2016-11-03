@@ -40,15 +40,10 @@
 				$admin_city_value=$('#admin_city_value'),
 				$admin_area_value=$('#admin_area_value'),
 				$admin_address=$('#admin_address'),
-				$admin_logoImage_file=$('#admin_logoImage_file'),
 				$admin_storeName_btn=$('#admin_storeName_btn'),
 				$admin_logoImage_btn=$('#admin_logoImage_btn'),
-				$admin_logoImage_upload=$('#admin_logoImage_upload'),
 				$admin_telephone_btn=$('#admin_telephone_btn'),
 				$admin_address_btn=$('#admin_address_btn'),
-				QN=new QiniuJsSDK()/*七牛对象*/,
-				img_token=getToken(),
-				logo_upload=null,
 				update_config={
 					url:"http://120.24.226.70:8081/yttx-providerbms-api/provider/basicset/update",
 					dataType:'JSON',
@@ -56,12 +51,28 @@
 					data:{
 						userId:decodeURIComponent(logininfo.param.userId),
 						token:decodeURIComponent(logininfo.param.token),
-						id:$admin_id.val(),
 						operationType:1,
 						updateValue:'',
 						providerId:decodeURIComponent(logininfo.param.providerId)
 					}
+				},
+				logo_config={
+					url:"http://120.24.226.70:8081/yttx-providerbms-api/provider/logo/update",
+					dataType:'JSON',
+					method:'post',
+					data:{
+						userId:decodeURIComponent(logininfo.param.userId),
+						token:decodeURIComponent(logininfo.param.token),
+						operationType:2,
+						logoImage:'',
+						providerId:decodeURIComponent(logininfo.param.providerId)
+					}
 				};
+
+			/*上传对象*/
+			var logo_QN_Upload=new QiniuJsSDK(),
+				ImageUpload_Token=getToken()||null,
+				upload_bars= [];
 
 
 			/*加载数据*/
@@ -70,106 +81,77 @@
 
 
 			/*绑定logo上传*/
-			if(img_token!==null){
-				$admin_logoImage.attr({
-					'data-image':''
-				});
-				logo_upload = QN.uploader({
-					runtimes: 'html5,flash,html4',
+			if(ImageUpload_Token!==null){
+				var logo_image_upload = logo_QN_Upload.uploader({
+					runtimes: 'html5,html4,flash,silverlight',
 					browse_button: 'admin_logoImage_file',
-					uptoken :img_token.qiniuToken,// uptoken是上传凭证，由其他程序生成
+					uptoken :ImageUpload_Token.qiniuToken,// uptoken是上传凭证，由其他程序生成
 					multi_selection:false,
 					get_new_uptoken: false,// 设置上传文件的时候是否每次都重新获取新的uptoken
 					unique_names:false,// 默认false，key为文件名。若开启该选项，JS-SDK会为每个文件自动生成key（文件名）
 					save_key:false,//默认false。若在服务端生成uptoken的上传策略中指定了sava_key，则开启，SDK在前端将不对key进行任何处理
-					domain:img_token.qiniuDomain,//bucket域名，下载资源时用到，必需
-					container:'admin_logoImage',// 上传区域DOM ID，默认是browser_button的父元素
+					domain:ImageUpload_Token.qiniuDomain,//bucket域名，下载资源时用到，必需
 					flash_swf_url: '../../js/plugins/plupload/Moxie.swf',//引入flash，相对路径
+					silverlight_xap_url : '../../js/plugins/plupload/Moxie.xap',
 					max_retries: 3,// 上传失败最大重试次数
 					dragdrop:false,
-					chunk_size: '500kb',
-					auto_start:false,
+					chunk_size: '2mb',
+					auto_start:true,
+					max_file_size : '500kb',
 					filters:{
-						max_file_size : '500kb',
 						mime_types: [
 							{
-								title : "Image files", extensions : "jpg,png,jpeg"
+								title : "Image files",
+								extensions : "jpg,gif,png,jpeg"
 							}
 						]
 					},
 					init: {
-						'FilesAdded': function(up, files) {
-							$admin_logoImage.attr({
-								'data-image':''
-							});
+						'PostInit': function() {},
+						'FilesAdded': function(up, file) {
+							var temp_bars=this.files.length,
+								j=0;
+							upload_bars.length=0;
+							for(j;j<temp_bars;j++){
+								upload_bars.push(this.files[j]['id']);
+							}
 						},
 						'BeforeUpload': function(up, file) {
+							show_loading_bar(30);
 						},
 						'UploadProgress': function(up, file) {},
 						'FileUploaded': function(up, file, info) {
 							/*获取上传成功后的文件的Url*/
+
 							var domain=up.getOption('domain'),
 								name=JSON.parse(info);
 
 							$admin_logoImage.attr({
-								'data-image':domain+'/'+name.key+"?imageView2/1/w/160/h/160"
-							}).html('<img src="'+domain+'/'+name.key+"?imageView2/1/w/160/h/160"+'" alt="店铺LOGO">');
+								'data-image':domain+'/'+name.key}).html('<img src="'+domain+'/'+name.key+"?imageView2/1/w/160/h/160"+'" alt="店铺LOGO">');
 						},
 						'Error': function(up, err, errTip) {
-							var opt=up.settings,
-								file=err.file,
-								setsize=parseInt(opt.filters.max_file_size,10),
-								realsize=parseInt(file.size / 1024,10);
-
-							if(realsize>setsize){
-								dia.content('<span class="g-c-bs-warning g-btips-warn">您选择的文件太大(<span class="g-c-red1"> '+realsize+'kb</span>),不能超过(<span class="g-c-red1"> '+setsize+'kb</span>)</span>').show();
-								setTimeout(function(){
-									dia.close();
-								},3000);
-							}
+							dia.content('<span class="g-c-bs-warning g-btips-warn">'+errTip+'</span>').show();
+							setTimeout(function(){
+								dia.close();
+							},3000);
 							console.log(errTip);
 						},
-						'UploadComplete': function() {
-							dia.content('<span class="g-c-bs-success g-btips-succ">上传成功</span>').show()
+						'UploadComplete': function(up, file) {
+							dia.content('<span class="g-c-bs-success g-btips-succ">上传成功</span>').show();
+							upload_bars.length=0;
 							setTimeout(function(){
 								dia.close();
 							},2000);
 						},
 						'Key': function(up, file) {
-							var str=moment().format("YYYYMMDDHHmmSSSS");
-							return "provider_"+str;
+							/*调用滚动条*/
+							uploadShowBars(file['id']);
+							var str="logo_"+moment().format("YYYYMMDDHHmmSSSS");
+							return str;
 						}
 					}
 				});
-			}else {
-				$admin_logoImage_file.on('click',function(){
-					dia.content('<span class="g-c-bs-warning g-btips-warn">暂未开通此接口</span>').show();
-					setTimeout(function () {
-						dia.close();
-					},2000);
-					return false;
-				});
 			}
-			$admin_logoImage_upload.on('click',function(){
-				if(img_token===null){
-					dia.content('<span class="g-c-bs-warning g-btips-warn">暂未开通此接口</span>').show();
-					setTimeout(function () {
-						dia.close();
-					},2000);
-					return false;
-				}
-				if($admin_logoImage.attr('data-image')===''){
-					dia.content('<span class="g-c-bs-warning g-btips-warn">请选择您要修改的图片</span>').show();
-					setTimeout(function () {
-						dia.close();
-					},2000);
-					return false;
-				}
-				/*执行上传*/
-				logo_upload.start();
-			});
-
-
 
 
 
@@ -190,16 +172,16 @@
 							update_config.data['updateValue']=$admin_storeName.val();
 							tips='店铺名称';
 						}else if(selector[1]==='logoImage'){
-							var tempimg=$admin_storeName.attr('data-image');
-							if(!tempimg||tempimg===''){
+							var tempimg=$admin_logoImage.attr('data-image');
+							if(tempimg===''){
 								dia.content('<span class="g-c-bs-warning g-btips-warn">请先上传图像</span>').show();
 								setTimeout(function () {
 									dia.close();
 								},2000);
 								return false;
 							}
-							update_config.data['operationType']=2;
-							update_config.data['updateValue']=tempimg;
+							logo_config.data['operationType']=2;
+							logo_config.data['logoImage']=tempimg;
 							tips='店铺LOGO';
 						}else if(selector[1]==='telephone'){
 							var tempphone=public_tool.trims($admin_telephone.val());
@@ -227,7 +209,13 @@
 							tips='地址详情';
 						}
 
-						$.ajax(update_config).done(function(resp){
+						$.ajax((function(){
+							if(tips==='店铺LOGO'){
+								return logo_config;
+							}else{
+								return update_config;
+							}
+						}())).done(function(resp){
 							var code=parseInt(resp.code,10);
 							if(code!==0){
 								dia.content('<span class="g-c-bs-warning g-btips-warn">'+(resp.message||'修改 "'+tips+'" 失败')+'</span>').show();
@@ -238,6 +226,9 @@
 								return false;
 							}
 							dia.content('<span class="g-c-bs-success g-btips-succ">修改 "'+tips+'" 成功</span>').show();
+							if(tips==='店铺LOGO'){
+								$admin_logoImage.attr({'data-image':''});
+							}
 							setTimeout(function () {
 								dia.close();
 							},2000);
@@ -335,7 +326,9 @@
 								var tempimg=result[i],
 									imgreg=/(jpeg|jpg|gif|png)/g;
 
-								if(tempimg.indexOf('.')!==-1){
+								if(tempimg.indexOf('qiniucdn.com')!==-1){
+									$admin_logoImage.html('<img src="'+result[i]+'?imageView2/1/w/160/h/160" alt="店铺LOGO">');
+								}else if(tempimg.indexOf('.')!==-1){
 									if(imgreg.test(tempimg)){
 										$admin_logoImage.html('<img src="'+result[i]+'" alt="店铺LOGO">');
 									}else{
@@ -353,18 +346,19 @@
 			}).fail(function(resp){
 				console.log('error');
 			});
-		};
+		}
 
 
 		/*获取七牛token*/
 		function getToken(){
 			var result=null;
 			$.ajax({
-				url:'http://120.24.226.70:8081/yttx-providerbms-api/commom/getQiniuToken',
+				url:'http://120.24.226.70:8081/yttx-providerbms-api/qiniu/token/get',
 				async:false,
 				type:'post',
 				datatype:'json',
 				data:{
+					bizType:2,
 					providerId:decodeURIComponent(logininfo.param.providerId),
 					userId:decodeURIComponent(logininfo.param.userId),
 					token:decodeURIComponent(logininfo.param.token)
@@ -380,7 +374,25 @@
 				console.log(resp.message);
 			});
 			return result;
-		};
+		}
+
+
+		/*上传进度条*/
+		function uploadShowBars(id){
+			var len=upload_bars.length;
+			if(len>0){
+				var j= 0;
+				for(j;j<len;j++){
+					if(upload_bars[j]===id){
+						var bars=parseInt(((j+1)/len) * 100,10);
+						setTimeout(function(){
+							show_loading_bar(bars);
+						},0);
+						break;
+					}
+				}
+			}
+		}
 
 	});
 

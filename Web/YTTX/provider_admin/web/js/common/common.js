@@ -13,6 +13,15 @@
 	public_tool.supportStorage=(function(){
 		return localStorage&&sessionStorage?true:false;
 	}());
+	//判断是否支持图片
+	public_tool.supportImage=(function(){
+		var wURL=window.URL;
+		if(wURL){
+			return typeof wURL.createObjectURL==='function'?true:false;
+		}else{
+			return false;
+		}
+	}());
 	//设置本地存储
 	public_tool.setParams=function(key,value,flag){
 		if(this.supportStorage){
@@ -559,7 +568,7 @@
 					if(partx[k]===','){
 						filtercount++;
 					}
-				};
+				}
 				partz=partz.slice(filtercount);
 			}
 		}
@@ -832,7 +841,7 @@
 				}
 			},1000);
 		}
-	}
+	};
 
 
 	/*判断请求域是否一致*/
@@ -1540,7 +1549,7 @@
 	public_tool.isRender=function(){
 		var self=this;
 		/*判定兼容性*/
-		if(self.supportStorage){
+		if(self.supportStorage&&self.supportImage){
 			/*调用路由*/
 			self.getRoute();
 			/*判断是否登陆*/

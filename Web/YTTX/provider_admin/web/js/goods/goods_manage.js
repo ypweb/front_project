@@ -18,7 +18,6 @@
 			});
 
 
-
 			/*dom引用和相关变量定义*/
 			var $goods_manage_wrap=$('#goods_manage_wrap')/*表格*/,
 				module_id='yttx-goods-manage'/*模块id，主要用于本地存储传值*/,
@@ -34,6 +33,8 @@
 				})/*一般提示对象*/,
 				dialogObj=public_tool.dialog()/*回调提示对象*/,
 				$admin_page_wrap=$('#admin_page_wrap')/*分页数据*/;
+
+
 
 
 
@@ -110,15 +111,17 @@
 							{
 								"data":"imageUrl",
 								"render":function(data, type, full, meta ){
-									var img=validImages(data),str='';
-									if(img!==''){
-										if(img.indexOf('qiniucdn.com')!==-1){
-											str='<div class="admin-goods-thumbnail "><img alt="" src="'+img+'?imageView2/1/w/80/h/80" /></div>';
-										}else{
-											str='<div class="admin-goods-thumbnail "><img alt="" src="'+img+'" /></div>';
-										}
+									var img=data,
+										str='';
+									if(img.indexOf('qiniucdn.com')!==-1){
+										str='<div class="admin-goods-thumbnail1"><img alt="" src="'+img+'?imageView2/1/w/80/h/80" /></div>';
 									}else{
-										str='<div class="admin-goods-thumbnail "></div>';
+										img=validImages(data);
+										if(img!==''){
+											str='<div class="admin-goods-thumbnail1"><img alt="" src="'+img+'" /></div>';
+										}else{
+											str='<div class="admin-goods-thumbnail1"></div>';
+										}
 									}
 									return str;
 								}
@@ -301,10 +304,10 @@
 
 				/*修改,编辑操作*/
 				if(action==='update'){
-					public_tool.setParams('yttx-goods-add',{
+					public_tool.setParams('yttx-goods-edit',{
 						id:id
 					});
-					location.href='yttx-goods-add.html';
+					location.href='yttx-goods-edit.html';
 				}else if(action==='select'){
 					public_tool.setParams('yttx-goods-detail',{
 						id:id
@@ -384,15 +387,15 @@
 
 					/*上架和下架*/
 					$.ajax({
-							url:"http://120.24.226.70:8081/yttx-providerbms-api/goods/operate",
+							url:"http://120.24.226.70:8081/yttx-providerbms-api/goods/status/update",
 							method: 'POST',
 							dataType: 'json',
 							data:{
-								id:id,
+								ids:id,
 								providerId:decodeURIComponent(logininfo.param.providerId),
 								userId:decodeURIComponent(logininfo.param.userId),
 								token:decodeURIComponent(logininfo.param.token),
-								operate:status
+								status:status
 							}
 						})
 						.done(function(resp){
@@ -444,7 +447,7 @@
 			}else{
 				table.ajax.config(opt.config.ajax).load();
 			}
-		};
+		}
 
 
 		/*判断图片合法格式*/
@@ -458,7 +461,7 @@
 					str=value;
 				}else{
 					str='';
-				};
+				}
 			}else{
 				str='';
 			}
