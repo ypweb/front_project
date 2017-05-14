@@ -39,8 +39,7 @@
 
 
 			/*查询对象*/
-			var $search_name=$('#search_name'),
-				$search_status=$('#search_status'),
+			var $search_keyword=$('#search_keyword'),
 				$admin_search_btn=$('#admin_search_btn'),
 				$admin_search_clear=$('#admin_search_clear');
 
@@ -60,7 +59,7 @@
 						autoWidth:true,/*是否*/
 						paging:false,
 						ajax:{
-							url:"http://120.76.237.100:8082/yttx-providerbms-api/goods/list",
+							url:"http://10.0.5.226:8082/yttx-providerbms-api/goods/list",
 							dataType:'JSON',
 							method:'post',
 							dataSrc:function ( json ) {
@@ -77,25 +76,32 @@
 									return [];
 								}
 								var result=json.result;
-								/*设置分页*/
-								goodsmanage_page.page=result.page;
-								goodsmanage_page.pageSize=result.pageSize;
-								goodsmanage_page.total=result.count;
-								/*分页调用*/
-								$admin_page_wrap.pagination({
-									pageSize:goodsmanage_page.pageSize,
-									total:goodsmanage_page.total,
-									pageNumber:goodsmanage_page.page,
-									onSelectPage:function(pageNumber,pageSize){
-										/*再次查询*/
-										var param=goodsmanage_config.config.ajax.data;
-										param.page=pageNumber;
-										param.pageSize=pageSize;
-										goodsmanage_config.config.ajax.data=param;
-										getColumnData(goodsmanage_page,goodsmanage_config);
-									}
-								});
-								return result.list;
+								if(typeof result==='undefined'){
+									goodsmanage_page.page=1;
+									goodsmanage_page.total=0;
+									return [];
+								}
+								if(result){
+									/*设置分页*/
+									goodsmanage_page.page=result.page;
+									goodsmanage_page.pageSize=result.pageSize;
+									goodsmanage_page.total=result.count;
+									/*分页调用*/
+									$admin_page_wrap.pagination({
+										pageSize:goodsmanage_page.pageSize,
+										total:goodsmanage_page.total,
+										pageNumber:goodsmanage_page.page,
+										onSelectPage:function(pageNumber,pageSize){
+											/*再次查询*/
+											var param=goodsmanage_config.config.ajax.data;
+											param.page=pageNumber;
+											param.pageSize=pageSize;
+											goodsmanage_config.config.ajax.data=param;
+											getColumnData(goodsmanage_page,goodsmanage_config);
+										}
+									});
+									return result.list?result.list:[];
+								}
 							},
 							data:{
 								providerId:decodeURIComponent(logininfo.param.providerId),
@@ -262,7 +268,7 @@
 
 			/*清空查询条件*/
 			$admin_search_clear.on('click',function(){
-				$.each([$search_name,$search_status],function(){
+				$.each([$search_keyword],function(){
 					this.val('');
 				});
 			});
@@ -273,8 +279,8 @@
 			$admin_search_btn.on('click',function(){
 				var data= $.extend(true,{},goodsmanage_config.config.ajax.data);
 
-				$.each([$search_name,$search_status],function(){
-					var text=this.val()||this.find(':selected').val(),
+				$.each([$search_keyword],function(){
+					var text=this.val(),
 						selector=this.selector.slice(1),
 						key=selector.split('_');
 
@@ -284,6 +290,9 @@
 						}
 					}else{
 						data[key[1]]=text;
+						if(data['page']!==1){
+							data['page']=1;
+						}
 					}
 
 				});
@@ -338,7 +347,7 @@
 					setSure.sure('delete',function(cf){
 						/*to do*/
 						$.ajax({
-								url:"http://120.76.237.100:8082/yttx-providerbms-api/goods/delete",
+								url:"http://10.0.5.226:8082/yttx-providerbms-api/goods/delete",
 								method: 'POST',
 								dataType: 'json',
 								data:{
@@ -400,7 +409,7 @@
 
 					/*上架和下架*/
 					$.ajax({
-							url:"http://120.76.237.100:8082/yttx-providerbms-api/goods/status/update",
+							url:"http://10.0.5.226:8082/yttx-providerbms-api/goods/status/update",
 							method: 'POST',
 							dataType: 'json',
 							data:{
@@ -456,7 +465,7 @@
 		/*获取数据*/
 		function getColumnData(page,opt){
 			if(table===null){
-				if(!public_tool.isSameDomain("http://120.76.237.100:8082")){
+				if(!public_tool.isSameDomain("http://10.0.5.226:8082")){
 					return false;
 				}
 				table=opt.$goods_manage_wrap.DataTable(opt.config);

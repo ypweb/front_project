@@ -119,11 +119,37 @@
 
                         <!--表格主体-->
                         <div class="panel-body">
+                            <div class="admin-search-wrap">
+                                <div class="admin-search-item">
+                                    <label>标签名称：</label>
+                                    <input type="text" id="search_name" />
+                                </div>
+                                <div class="admin-search-item">
+                                    <label>排序号：</label>
+                                    <input type="text" id="search_sort" />
+                                </div>
+                                <div class="admin-search-item">
+                                    <label>商品分类：</label>
+                                    <select class="g-w-number8" id="search_gtione" ></select>
+                                    <select class="g-w-number8" id="search_gtitwo" ></select>
+                                    <select class="g-w-number8" id="search_gtithree" ></select>
+                                </div>
+                                <div class="admin-search-item">
+                                    <span id="admin_search_btn" class="btn btn-info btn-icon g-br2">
+                                        <i class="fa-search"></i>查询
+                                    </span>
+                                    <span id="admin_search_clear" class="btn btn-info btn-icon g-br2">
+                                        <i class="fa-spinner"></i>清空
+                                    </span>
+                                    <span class="g-c-bs-info">&nbsp;&nbsp;(注：没有选中分类代表可共用)</span>
+                                </div>
+                            </div>
 
                             <table class="table table-bordered table-striped admin-table">
                                 <!--分组样式-->
                                 <colgroup>
-                                    <col class="g-w-percent35" />
+                                    <col class="g-w-percent25" />
+                                    <col class="g-w-percent10" />
                                     <col class="g-w-percent5" />
                                     <col class="g-w-percent10" />
                                 </colgroup>
@@ -132,6 +158,7 @@
                                 <thead>
                                 <tr>
                                     <th>标签(属性)名称</th>
+                                    <th>商品分类</th>
                                     <th>排序</th>
                                     <th>操作</th>
                                 </tr>
@@ -141,13 +168,22 @@
                                 <!--表主体-->
                                 <tbody>
                                 <tr>
-                                    <td class="g-c-red1" id="admin_errortip_wrap" colspan="3"></td>
+                                    <td class="g-c-red1" id="admin_errortip_wrap"  colspan="2"></td>
+                                    <td class="admin-form1" colspan="2">
+                                        <span class="admin-rpos-wrap">
+                                             <button type="button"  id="admin_addlabel_already" class="btn btn-white g-c-gray9 g-br3">已存在的标签名称</button>
+                                             <ul data-select="false" class="admin-list-widget addcode-list-widget g-d-hidei" id="admin_addlabel_list"></ul>
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="3" id="admin_list_wrap"></td>
+                                    <td colspan="4" id="admin_list_wrap"></td>
                                 </tr>
                                 </tbody>
                             </table>
+                            <div class="admin-page-wrap">
+                                <div class="easyui-pagination g-w-percent50" id="admin_page_wrap" data-options="links:5,layout:['manual','first','prev','links','next','last'],displayMsg:'显示{from}&nbsp;到&nbsp;{to}&nbsp;共&nbsp;{total}条记录'"></div>
+                            </div>
                         </div>
 
 
@@ -200,7 +236,7 @@
                             <label class="control-label"><span class="form-require-item g-c-red1">*</span>属性名称：<span class="g-c-red1" id="admin_addattr_tips"></span></label>
                             <div class="row self-error-pos-wrap">
                                 <div class="col-md-10">
-                                    <input placeholder="请输入属性名称" data-validate="required" data-message-required="属性名称不能为空" value=""  type="text" class="form-control" name="attrname"   id="admin_attrname" />
+                                    <input placeholder="请输入属性名称" data-validate="required" data-message-required="属性名称不能为空" value=""  type="text" class="form-control" name="item_attrname"   id="admin_attrname" />
                                 </div>
                                 <div class="col-md-2">
                                         <span class="input-group-btn admin-rpos-wrap" style="z-index:20;">
@@ -213,7 +249,7 @@
 
                         <div class="form-group">
                             <label class="control-label"><span class="form-require-item g-c-red1">*</span>排序号(值越大越靠前)：</label>
-                            <input placeholder="请输入排序号" data-validate="required,number" data-message-required="排序号不能为空" data-message-number="排序号只能为数字" value=""  type="text" class="form-control" name="attrsort"   id="admin_attrsort" />
+                            <input placeholder="请输入排序号" data-validate="required,number" data-message-required="排序号不能为空" data-message-number="排序号只能为数字" value=""  type="text" class="form-control" name="item_attrsort"   id="admin_attrsort" />
                         </div>
 
                         <div class="form-group">
@@ -278,6 +314,7 @@
     <script src="../../js/common/base.js"></script>
     <script src="../../js/common/common.js"></script>
     <script src="../../js/plugins/jquery-validate/jquery.validate.js"></script>
+    <script src="../../js/plugins/pagination/pagination.js"></script>
     <script src="../../js/attribute/attribute_addval.js"></script>
 </body>
 </html>
